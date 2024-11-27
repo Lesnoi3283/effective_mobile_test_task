@@ -12,6 +12,8 @@ import (
 	"net/http"
 )
 
+//todo: в хендлерах заменить прием структуры песни с кучей полей на локальные <smg>Request, ибо в сваггере получается хрень
+
 func main() {
 	conf := config.Configure()
 
