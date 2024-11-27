@@ -69,6 +69,7 @@ func (h *handler) PostSong(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Add("Content-Type", "application/json")
 	w.Write(jsonAnswer)
 	return
 }

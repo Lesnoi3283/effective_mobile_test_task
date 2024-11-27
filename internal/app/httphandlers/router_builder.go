@@ -25,8 +25,8 @@ func NewHTTPRouter(logger *zap.SugaredLogger, storage requiredinterfaces.SongSto
 	r.Post("/song", h.PostSong)
 	r.Put("/song", h.PutSong)
 	r.Get("/lyrics", h.GetSongLyrics)
-	r.Delete("/song", h.GetSongLyrics)
-	r.Get("songs_list", h.SongsListGet)
+	r.Delete("/song", h.DeleteSong)
+	r.Get("/songs", h.SongsListGet)
 
 	return r
 }

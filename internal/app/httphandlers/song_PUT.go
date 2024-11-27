@@ -1,11 +1,11 @@
 package httphandlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"io"
 	"musiclib/internal/app/entities"
+	"musiclib/pkg/databases/dberrors"
 	"net/http"
 )
 
@@ -45,12 +45,11 @@ func (h *handler) PutSong(w http.ResponseWriter, r *http.Request) {
 
 	//update
 	err = h.storage.UpdateSong(r.Context(), song)
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, dberrors.NewNotFoundErr()) {
 		h.logger.Debugf("song was`nt found in db, err: %v", err)
 		w.WriteHeader(http.StatusNotFound)
 		return
-	}
-	if err != nil {
+	} else if err != nil {
 		h.logger.Debugf("failed to update song in database: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return

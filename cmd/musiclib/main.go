@@ -26,7 +26,7 @@ func main() {
 		log.Fatalf("Failed to build logger: %v", err)
 	}
 	sugar := logger.Sugar()
-	sugar.Infof("Sugar logger was created with log level \"%v\"", logLevel)
+	sugar.Infof("Sugar logger was created with log level `%v`", logLevel)
 
 	//set storage
 	storage, err := gormpostgres.NewGormDB(conf.DBConnectionString)
@@ -43,5 +43,6 @@ func main() {
 
 	//build and run server:
 	r := httphandlers.NewHTTPRouter(sugar, storage, provider)
+	sugar.Infof("Starting an HTTP server on address `%v`...", conf.ServerAddress)
 	http.ListenAndServe(conf.ServerAddress, r)
 }

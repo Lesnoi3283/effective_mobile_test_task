@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"musiclib/internal/app/entities"
+	"musiclib/pkg/databases/dberrors"
 	"net/http"
 )
 
@@ -50,11 +51,11 @@ func (h *handler) SongsListGet(w http.ResponseWriter, r *http.Request) {
 
 	//get songs list
 	songs, err := h.storage.GetSongList(r.Context(), filter.Filter, filter.Offset, filter.Limit)
-	if errors.Is(err, sql.ErrNoRows) {
-		h.logger.Debugf("failed to find songs: %v", err)
+	if errors.Is(err, dberrors.NewNotFoundErr()) {
+		h.logger.Debugf("no songs with rerquested params: %v", err)
 		w.WriteHeader(http.StatusNoContent)
 		return
-	} else if err != nil {
+	} else if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		h.logger.Debugf("failed get songs: %v", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -62,6 +63,7 @@ func (h *handler) SongsListGet(w http.ResponseWriter, r *http.Request) {
 
 	//answer
 	jsonAnswer, err := json.Marshal(songs)
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(jsonAnswer)
 	return

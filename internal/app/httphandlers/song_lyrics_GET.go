@@ -1,10 +1,10 @@
 package httphandlers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
 	"io"
+	"musiclib/pkg/databases/dberrors"
 	"net/http"
 	"strings"
 )
@@ -49,9 +49,9 @@ func (h *handler) GetSongLyrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//save
+	//get lyrics
 	text, err := h.storage.GetSongLyrics(r.Context(), lyricsRequest.SongID)
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, dberrors.NewNotFoundErr()) {
 		h.logger.Debugf("no song found with id %d", lyricsRequest.SongID)
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -63,7 +63,7 @@ func (h *handler) GetSongLyrics(w http.ResponseWriter, r *http.Request) {
 
 	//get couplet
 	couplets := strings.Split(text, "\n\n")
-	if lyricsRequest.CoupletNum > len(couplets) {
+	if lyricsRequest.CoupletNum > len(couplets)-1 {
 		h.logger.Debugf("requested couplet num is `%v`, but this song has only `%v` couplets.", lyricsRequest.CoupletNum, len(couplets))
 		w.WriteHeader(http.StatusNoContent)
 		return

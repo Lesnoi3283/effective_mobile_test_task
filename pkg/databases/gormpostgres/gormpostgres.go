@@ -2,10 +2,12 @@ package gormpostgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"musiclib/internal/app/entities"
+	"musiclib/pkg/databases/dberrors"
 )
 
 type GormDB struct {
@@ -51,7 +53,7 @@ func (g *GormDB) GetSongList(ctx context.Context, filter entities.Song, offset i
 		query = query.Where("song ILIKE ?", "%"+filter.Song+"%")
 	}
 	if filter.Group != "" {
-		query = query.Where("group ILIKE ?", "%"+filter.Group+"%")
+		query = query.Where("\"group\" ILIKE ?", "%"+filter.Group+"%")
 	}
 	if filter.ReleaseDate != "" {
 		query = query.Where("release_date = ?", filter.ReleaseDate)
@@ -59,6 +61,9 @@ func (g *GormDB) GetSongList(ctx context.Context, filter entities.Song, offset i
 
 	// get songs
 	err := query.Offset(offset).Limit(limit).Find(&songs).Error
+	if len(songs) == 0 {
+		return songs, dberrors.NewNotFoundErr()
+	}
 	return songs, err
 }
 
@@ -66,7 +71,9 @@ func (g *GormDB) GetSongList(ctx context.Context, filter entities.Song, offset i
 func (g *GormDB) GetSongLyrics(ctx context.Context, id uint64) (string, error) {
 	var song entities.Song
 	err := g.db.WithContext(ctx).Select("text").First(&song, id).Error
-	if err != nil {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return "", dberrors.NewNotFoundErr()
+	} else if err != nil {
 		return "", err
 	}
 	return song.Text, nil
@@ -79,5 +86,12 @@ func (g *GormDB) RemoveSong(ctx context.Context, id uint64) error {
 
 // UpdateSong updates the song.
 func (g *GormDB) UpdateSong(ctx context.Context, song entities.Song) error {
-	return g.db.WithContext(ctx).UpdateColumns(&song).Error
+	tx := g.db.WithContext(ctx).Model(&entities.Song{}).Where("id = ?", song.ID).Updates(&song)
+
+	// Проверяем количество затронутых строк
+	if tx.RowsAffected == 0 {
+		return dberrors.NewNotFoundErr()
+	}
+
+	return tx.Error
 }

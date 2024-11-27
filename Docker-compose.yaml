@@ -1,0 +1,40 @@
+version: '3.3'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: musicuser
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: musicdb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - music-app-network
+
+  music_lib:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SERVER_ADDRESS=0.0.0.0:8080
+      - DB_CONNECTION_STRING
+      - EXTRA_DATA_API_ADDRESS
+      - LOG_LEVEL
+    ports:
+      - "8080:8080"
+    networks:
+      - music-app-network
+
+
+networks:
+  music-app-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  vault-data:
