@@ -153,6 +153,7 @@ func Test_handler_PostSong(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := gomock.NewController(t)
+			defer c.Finish()
 			h := &handler{
 				storage:           tt.fields.storage(c),
 				logger:            sugar,

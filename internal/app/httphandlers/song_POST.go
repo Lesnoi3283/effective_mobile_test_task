@@ -15,12 +15,12 @@ type returnableID struct {
 // @Summary Creates new song
 // @Description Creates new song, asks different service for an additional data (release date, text and link).
 // @Accept  json
-// @Produce text
+// @Produce json
 // @Param song body entities.Song true "JSON song data"
 // @Success 201 {object} returnableID "Song ID"
 // @Failure 400 {nil} "Bad request"
 // @Failure 500 {nil} "Internal server error"
-// @Router /songs [post]
+// @Router /song [post]
 func (h *handler) PostSong(w http.ResponseWriter, r *http.Request) {
 	//get song from request
 	bodyBytes, err := io.ReadAll(r.Body)

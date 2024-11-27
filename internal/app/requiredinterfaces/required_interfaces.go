@@ -13,8 +13,8 @@ type ExtraDataProvider interface {
 
 type SongStorage interface {
 	SaveSong(ctx context.Context, song entities.Song) (id uint64, err error)
-	GetSongList(ctx context.Context, filter entities.Song, offset int) ([]entities.Song, error)
-	GetSongLyrics(ctx context.Context, id int) (string, error)
-	RemoveSong(ctx context.Context, id int) error
+	GetSongList(ctx context.Context, filter entities.Song, offset int, limit int) ([]entities.Song, error)
+	GetSongLyrics(ctx context.Context, id uint64) (string, error)
+	RemoveSong(ctx context.Context, id uint64) error
 	UpdateSong(ctx context.Context, song entities.Song) error
 }

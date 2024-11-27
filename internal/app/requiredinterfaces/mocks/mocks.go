@@ -76,22 +76,22 @@ func (m *MockSongStorage) EXPECT() *MockSongStorageMockRecorder {
 }
 
 // GetSongList mocks base method.
-func (m *MockSongStorage) GetSongList(ctx context.Context, filter entities.Song, offset int) ([]entities.Song, error) {
+func (m *MockSongStorage) GetSongList(ctx context.Context, filter entities.Song, offset, limit int) ([]entities.Song, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetSongList", ctx, filter, offset)
+	ret := m.ctrl.Call(m, "GetSongList", ctx, filter, offset, limit)
 	ret0, _ := ret[0].([]entities.Song)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetSongList indicates an expected call of GetSongList.
-func (mr *MockSongStorageMockRecorder) GetSongList(ctx, filter, offset interface{}) *gomock.Call {
+func (mr *MockSongStorageMockRecorder) GetSongList(ctx, filter, offset, limit interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSongList", reflect.TypeOf((*MockSongStorage)(nil).GetSongList), ctx, filter, offset)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSongList", reflect.TypeOf((*MockSongStorage)(nil).GetSongList), ctx, filter, offset, limit)
 }
 
 // GetSongLyrics mocks base method.
-func (m *MockSongStorage) GetSongLyrics(ctx context.Context, id int) (string, error) {
+func (m *MockSongStorage) GetSongLyrics(ctx context.Context, id uint64) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetSongLyrics", ctx, id)
 	ret0, _ := ret[0].(string)
@@ -106,7 +106,7 @@ func (mr *MockSongStorageMockRecorder) GetSongLyrics(ctx, id interface{}) *gomoc
 }
 
 // RemoveSong mocks base method.
-func (m *MockSongStorage) RemoveSong(ctx context.Context, id int) error {
+func (m *MockSongStorage) RemoveSong(ctx context.Context, id uint64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RemoveSong", ctx, id)
 	ret0, _ := ret[0].(error)

@@ -13,12 +13,21 @@ type GormDB struct {
 }
 
 // NewGormDB opens a new connection to a postgresql database.
-func NewGormDB(dsn string) (GormDB, error) {
+func NewGormDB(dsn string) (*GormDB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return GormDB{}, fmt.Errorf("failed to connect to database: %w", err)
+		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	return GormDB{db: db}, nil
+	return &GormDB{db: db}, nil
+}
+
+// Migrate migrates entities from package "entities" to a database.
+func (g *GormDB) Migrate() error {
+	err := g.db.AutoMigrate(entities.Song{})
+	if err != nil {
+		return fmt.Errorf("failed to migrate migrations: %w", err)
+	}
+	return nil
 }
 
 // SaveSong saves a new song and returns its ID.
@@ -54,7 +63,7 @@ func (g *GormDB) GetSongList(ctx context.Context, filter entities.Song, offset i
 }
 
 // GetSongLyrics returns song`s lyrics.
-func (g *GormDB) GetSongLyrics(ctx context.Context, id int) (string, error) {
+func (g *GormDB) GetSongLyrics(ctx context.Context, id uint64) (string, error) {
 	var song entities.Song
 	err := g.db.WithContext(ctx).Select("text").First(&song, id).Error
 	if err != nil {
@@ -64,11 +73,11 @@ func (g *GormDB) GetSongLyrics(ctx context.Context, id int) (string, error) {
 }
 
 // RemoveSong removes the song.
-func (g *GormDB) RemoveSong(ctx context.Context, id int) error {
+func (g *GormDB) RemoveSong(ctx context.Context, id uint64) error {
 	return g.db.WithContext(ctx).Delete(&entities.Song{}, id).Error
 }
 
 // UpdateSong updates the song.
 func (g *GormDB) UpdateSong(ctx context.Context, song entities.Song) error {
-	return g.db.WithContext(ctx).Save(&song).Error
+	return g.db.WithContext(ctx).UpdateColumns(&song).Error
 }
