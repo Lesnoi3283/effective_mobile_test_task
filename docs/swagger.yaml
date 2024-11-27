@@ -1,0 +1,167 @@
+definitions:
+  entities.IDMessage:
+    properties:
+      id:
+        type: integer
+    type: object
+  entities.Song:
+    properties:
+      group:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      release_date:
+        type: string
+      song:
+        type: string
+      text:
+        type: string
+    type: object
+  httphandlers.FilterRequest:
+    properties:
+      filter:
+        $ref: '#/definitions/entities.Song'
+      limit:
+        type: integer
+      offset:
+        type: integer
+    type: object
+  httphandlers.SongMessage:
+    properties:
+      group:
+        type: string
+      song:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /lyrics:
+    get:
+      description: Retrieves the requested couplet number from the specified song.
+      parameters:
+      - description: Song ID
+        in: query
+        name: song_id
+        required: true
+        type: integer
+      - description: Couplet Number
+        in: query
+        name: couplet_num
+        required: true
+        type: integer
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Couplet text
+          schema:
+            type: string
+        "204":
+          description: Requested couplet number is bigger than the number of couplets
+        "400":
+          description: Bad request
+        "404":
+          description: Song not found
+        "500":
+          description: Internal server error
+      summary: Returns a specific couplet from a song's lyrics
+  /song:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes current song by id.
+      parameters:
+      - description: JSON song ID
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/entities.IDMessage'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Success
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      summary: Deletes the song
+    post:
+      consumes:
+      - application/json
+      description: Creates new song, asks different service for an additional data
+        (release date, text and link).
+      parameters:
+      - description: JSON song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/httphandlers.SongMessage'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Song ID
+          schema:
+            $ref: '#/definitions/entities.IDMessage'
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      summary: Creates new song
+    put:
+      consumes:
+      - application/json
+      description: Updates current song by id.
+      parameters:
+      - description: JSON song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Song'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+      summary: Updates the song
+  /songs:
+    post:
+      consumes:
+      - application/json
+      description: filtration and pagination are supported
+      parameters:
+      - description: Filter params
+        in: body
+        name: filter
+        schema:
+          $ref: '#/definitions/httphandlers.FilterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Songs list
+          schema:
+            items:
+              $ref: '#/definitions/httphandlers.FilterRequest'
+            type: array
+        "204":
+          description: No songs found
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      summary: Returns list of songs
+swagger: "2.0"
