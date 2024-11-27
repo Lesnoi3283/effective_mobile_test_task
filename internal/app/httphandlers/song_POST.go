@@ -18,8 +18,8 @@ type returnableID struct {
 // @Produce json
 // @Param song body entities.Song true "JSON song data"
 // @Success 201 {object} returnableID "Song ID"
-// @Failure 400 {nil} "Bad request"
-// @Failure 500 {nil} "Internal server error"
+// @Failure 400 {object} nil "Bad request"
+// @Failure 500 {object} nil "Internal server error"
 // @Router /song [post]
 func (h *handler) PostSong(w http.ResponseWriter, r *http.Request) {
 	//get song from request

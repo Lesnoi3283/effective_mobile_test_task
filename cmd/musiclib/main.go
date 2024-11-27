@@ -1,9 +1,11 @@
 package main
 
 import (
+	httpSwagger "github.com/swaggo/http-swagger"
 	"go.uber.org/zap"
 	"log"
 	"musiclib/config"
+	_ "musiclib/docs"
 	"musiclib/internal/app/httphandlers"
 	"musiclib/internal/app/services/extraDataAPIProvider"
 	"musiclib/pkg/databases/gormpostgres"
@@ -43,6 +45,10 @@ func main() {
 
 	//build and run server:
 	r := httphandlers.NewHTTPRouter(sugar, storage, provider)
+	r.Handle("/swagger/*", httpSwagger.WrapHandler)
 	sugar.Infof("Starting an HTTP server on address `%v`...", conf.ServerAddress)
-	http.ListenAndServe(conf.ServerAddress, r)
+	err = http.ListenAndServe(conf.ServerAddress, r)
+	if err != nil {
+		sugar.Fatalf("Failed to start HTTP server, err: %v", err)
+	}
 }

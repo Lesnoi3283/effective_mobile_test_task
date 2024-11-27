@@ -10,8 +10,6 @@ import (
 	"net/http"
 )
 
-//todo: try to make it not exportable.
-
 type FilterRequest struct {
 	Offset int `json:"offset"`
 	Limit  int `json:"limit"`
@@ -22,13 +20,13 @@ type FilterRequest struct {
 // @Summary Returns list of songs
 // @Description filtration and pagination are supported
 // @Accept  json
-// @Produce array
+// @Produce application/json
 // @Param filter body FilterRequest false "Filter params"
 // @Success 201 {array} FilterRequest "Songs list"
-// @Failure 204 {nil} "No songs found"
-// @Failure 400 {nil} "Bad request"
-// @Failure 500 {nil} "Internal server error"
-// @Router /songs [post]
+// @Failure 204 {object} nil "No songs found"
+// @Failure 400 {object} nil "Bad request"
+// @Failure 500 {object} nil "Internal server error"
+// @Router /songs [get]
 func (h *handler) SongsListGet(w http.ResponseWriter, r *http.Request) {
 	//get filter from request
 	bodyBytes, err := io.ReadAll(r.Body)

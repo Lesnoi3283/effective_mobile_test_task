@@ -15,9 +15,9 @@ import (
 // @Accept  json
 // @Produce plain
 // @Param song body entities.Song true "JSON song ID"
-// @Success 201 {nil} "Success"
-// @Failure 400 {nil} "Bad request"
-// @Failure 500 {nil} "Internal server error"
+// @Success 201 {object} nil "Success"
+// @Failure 400 {object} nil "Bad request"
+// @Failure 500 {object} nil "Internal server error"
 // @Router /song [delete]
 func (h *handler) DeleteSong(w http.ResponseWriter, r *http.Request) {
 	//get song from request

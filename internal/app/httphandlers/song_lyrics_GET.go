@@ -18,14 +18,14 @@ type SongLyricsRequest struct {
 // @Summary Returns song`s lyrics
 // @Description
 // @Accept  json
-// @Produce text
+// @Produce text/plain
 // @Param song body SongLyricsRequest true "JSON song lyrics data"
 // @Success 201 {object} returnableID "Song ID"
-// @Failure 400 {nil} "Bad request"
-// @Failure 404 {nil} "Song not found"
-// @Failure 204 {nil} "Requested couplet number is bigger than len of couplets"
-// @Failure 500 {nil} "Internal server error"
-// @Router /song [post]
+// @Failure 400 {object} nil "Bad request"
+// @Failure 404 {object} nil "Song not found"
+// @Failure 204 {object} nil "Requested couplet number is bigger than len of couplets"
+// @Failure 500 {object} nil "Internal server error"
+// @Router /lyrics [post]
 func (h *handler) GetSongLyrics(w http.ResponseWriter, r *http.Request) {
 	//get song from request
 	bodyBytes, err := io.ReadAll(r.Body)

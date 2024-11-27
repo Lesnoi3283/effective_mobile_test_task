@@ -1,0 +1,164 @@
+definitions:
+  entities.Song:
+    properties:
+      group:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      release_date:
+        type: string
+      song:
+        type: string
+      text:
+        type: string
+    type: object
+  httphandlers.FilterRequest:
+    properties:
+      filter:
+        $ref: '#/definitions/entities.Song'
+      limit:
+        type: integer
+      offset:
+        type: integer
+    type: object
+  httphandlers.SongLyricsRequest:
+    properties:
+      couplet_num:
+        type: integer
+      song_id:
+        type: integer
+    type: object
+  httphandlers.returnableID:
+    properties:
+      id:
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /lyrics:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: JSON song lyrics data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/httphandlers.SongLyricsRequest'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Song ID
+          schema:
+            $ref: '#/definitions/httphandlers.returnableID'
+        "204":
+          description: Requested couplet number is bigger than len of couplets
+        "400":
+          description: Bad request
+        "404":
+          description: Song not found
+        "500":
+          description: Internal server error
+      summary: Returns song`s lyrics
+  /song:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes current song by id. Only ID is required.
+      parameters:
+      - description: JSON song ID
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Song'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Success
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      summary: Deletes the song
+    post:
+      consumes:
+      - application/json
+      description: Creates new song, asks different service for an additional data
+        (release date, text and link).
+      parameters:
+      - description: JSON song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Song'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Song ID
+          schema:
+            $ref: '#/definitions/httphandlers.returnableID'
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      summary: Creates new song
+    put:
+      consumes:
+      - application/json
+      description: Updates current song by id.
+      parameters:
+      - description: JSON song data
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/entities.Song'
+      produces:
+      - text/plain
+      responses:
+        "201":
+          description: Success
+        "400":
+          description: Bad request
+        "404":
+          description: Not found
+        "500":
+          description: Internal server error
+      summary: Updates the song
+  /songs:
+    get:
+      consumes:
+      - application/json
+      description: filtration and pagination are supported
+      parameters:
+      - description: Filter params
+        in: body
+        name: filter
+        schema:
+          $ref: '#/definitions/httphandlers.FilterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Songs list
+          schema:
+            items:
+              $ref: '#/definitions/httphandlers.FilterRequest'
+            type: array
+        "204":
+          description: No songs found
+        "400":
+          description: Bad request
+        "500":
+          description: Internal server error
+      summary: Returns list of songs
+swagger: "2.0"
