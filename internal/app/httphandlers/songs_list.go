@@ -26,7 +26,7 @@ type FilterRequest struct {
 // @Failure 204 {object} nil "No songs found"
 // @Failure 400 {object} nil "Bad request"
 // @Failure 500 {object} nil "Internal server error"
-// @Router /songs [get]
+// @Router /songs [post]
 func (h *handler) SongsListGet(w http.ResponseWriter, r *http.Request) {
 	//get filter from request
 	bodyBytes, err := io.ReadAll(r.Body)

@@ -1,4 +1,9 @@
 definitions:
+  entities.IDMessage:
+    properties:
+      id:
+        type: integer
+    type: object
   entities.Song:
     properties:
       group:
@@ -23,60 +28,58 @@ definitions:
       offset:
         type: integer
     type: object
-  httphandlers.SongLyricsRequest:
+  httphandlers.SongMessage:
     properties:
-      couplet_num:
-        type: integer
-      song_id:
-        type: integer
-    type: object
-  httphandlers.returnableID:
-    properties:
-      id:
-        type: integer
+      group:
+        type: string
+      song:
+        type: string
     type: object
 info:
   contact: {}
 paths:
   /lyrics:
-    post:
-      consumes:
-      - application/json
+    get:
+      description: Retrieves the requested couplet number from the specified song.
       parameters:
-      - description: JSON song lyrics data
-        in: body
-        name: song
+      - description: Song ID
+        in: query
+        name: song_id
         required: true
-        schema:
-          $ref: '#/definitions/httphandlers.SongLyricsRequest'
+        type: integer
+      - description: Couplet Number
+        in: query
+        name: couplet_num
+        required: true
+        type: integer
       produces:
       - text/plain
       responses:
-        "201":
-          description: Song ID
+        "200":
+          description: Couplet text
           schema:
-            $ref: '#/definitions/httphandlers.returnableID'
+            type: string
         "204":
-          description: Requested couplet number is bigger than len of couplets
+          description: Requested couplet number is bigger than the number of couplets
         "400":
           description: Bad request
         "404":
           description: Song not found
         "500":
           description: Internal server error
-      summary: Returns song`s lyrics
+      summary: Returns a specific couplet from a song's lyrics
   /song:
     delete:
       consumes:
       - application/json
-      description: Deletes current song by id. Only ID is required.
+      description: Deletes current song by id.
       parameters:
       - description: JSON song ID
         in: body
         name: song
         required: true
         schema:
-          $ref: '#/definitions/entities.Song'
+          $ref: '#/definitions/entities.IDMessage'
       produces:
       - text/plain
       responses:
@@ -98,14 +101,14 @@ paths:
         name: song
         required: true
         schema:
-          $ref: '#/definitions/entities.Song'
+          $ref: '#/definitions/httphandlers.SongMessage'
       produces:
       - application/json
       responses:
         "201":
           description: Song ID
           schema:
-            $ref: '#/definitions/httphandlers.returnableID'
+            $ref: '#/definitions/entities.IDMessage'
         "400":
           description: Bad request
         "500":
@@ -125,7 +128,7 @@ paths:
       produces:
       - text/plain
       responses:
-        "201":
+        "200":
           description: Success
         "400":
           description: Bad request
@@ -135,7 +138,7 @@ paths:
           description: Internal server error
       summary: Updates the song
   /songs:
-    get:
+    post:
       consumes:
       - application/json
       description: filtration and pagination are supported

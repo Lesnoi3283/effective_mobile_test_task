@@ -2,7 +2,6 @@ package httphandlers
 
 import (
 	"bytes"
-	"database/sql"
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -10,6 +9,7 @@ import (
 	"musiclib/internal/app/entities"
 	"musiclib/internal/app/requiredinterfaces"
 	"musiclib/internal/app/requiredinterfaces/mocks"
+	"musiclib/pkg/databases/dberrors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -107,7 +107,7 @@ func Test_handler_PutSong(t *testing.T) {
 						Text:        "No text",
 						Link:        "https://example.com/nonexistentsong",
 					}
-					storage.EXPECT().UpdateSong(gomock.Any(), song).Return(sql.ErrNoRows)
+					storage.EXPECT().UpdateSong(gomock.Any(), song).Return(dberrors.NewNotFoundErr())
 					return storage
 				},
 			},

@@ -7,8 +7,9 @@ import (
 	"net/http"
 )
 
-type returnableID struct {
-	ID uint64 `json:"id"`
+type SongMessage struct {
+	Song  string `json:"song"`
+	Group string `json:"group"`
 }
 
 // PostSong godoc
@@ -16,8 +17,8 @@ type returnableID struct {
 // @Description Creates new song, asks different service for an additional data (release date, text and link).
 // @Accept  json
 // @Produce json
-// @Param song body entities.Song true "JSON song data"
-// @Success 201 {object} returnableID "Song ID"
+// @Param song body SongMessage true "JSON song data"
+// @Success 201 {object} entities.IDMessage "Song ID"
 // @Failure 400 {object} nil "Bad request"
 // @Failure 500 {object} nil "Internal server error"
 // @Router /song [post]
@@ -31,25 +32,29 @@ func (h *handler) PostSong(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	song := entities.Song{}
-	err = json.Unmarshal(bodyBytes, &song)
+	songMessage := SongMessage{}
+	err = json.Unmarshal(bodyBytes, &songMessage)
 	if err != nil {
 		h.logger.Debugf("failed to unmarshal body: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if len(song.Song) == 0 {
+	if len(songMessage.Song) == 0 {
 		h.logger.Debugf("song name is empty")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	if len(song.Group) == 0 {
+	if len(songMessage.Group) == 0 {
 		h.logger.Debugf("song group is empty")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	//ask api for an additional data
+	song := entities.Song{
+		Song:  songMessage.Song,
+		Group: songMessage.Group,
+	}
 	song.ReleaseDate, song.Text, song.Link, err = h.extraDataProvider.GetExtraSongData(song)
 	if err != nil {
 		h.logger.Debugf("failed to get song data: %v", err)
@@ -64,7 +69,7 @@ func (h *handler) PostSong(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//answer
-	jsonAnswer, err := json.Marshal(returnableID{
+	jsonAnswer, err := json.Marshal(entities.IDMessage{
 		ID: song.ID,
 	})
 

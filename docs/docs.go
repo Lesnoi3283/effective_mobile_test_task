@@ -16,34 +16,37 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/lyrics": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
+            "get": {
+                "description": "Retrieves the requested couplet number from the specified song.",
                 "produces": [
                     "text/plain"
                 ],
-                "summary": "Returns song` + "`" + `s lyrics",
+                "summary": "Returns a specific couplet from a song's lyrics",
                 "parameters": [
                     {
-                        "description": "JSON song lyrics data",
-                        "name": "song",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/httphandlers.SongLyricsRequest"
-                        }
+                        "type": "integer",
+                        "description": "Song ID",
+                        "name": "song_id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Couplet Number",
+                        "name": "couplet_num",
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Song ID",
+                    "200": {
+                        "description": "Couplet text",
                         "schema": {
-                            "$ref": "#/definitions/httphandlers.returnableID"
+                            "type": "string"
                         }
                     },
                     "204": {
-                        "description": "Requested couplet number is bigger than len of couplets"
+                        "description": "Requested couplet number is bigger than the number of couplets"
                     },
                     "400": {
                         "description": "Bad request"
@@ -79,7 +82,7 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "Success"
                     },
                     "400": {
@@ -109,7 +112,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entities.Song"
+                            "$ref": "#/definitions/httphandlers.SongMessage"
                         }
                     }
                 ],
@@ -117,7 +120,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Song ID",
                         "schema": {
-                            "$ref": "#/definitions/httphandlers.returnableID"
+                            "$ref": "#/definitions/entities.IDMessage"
                         }
                     },
                     "400": {
@@ -129,7 +132,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Deletes current song by id. Only ID is required.",
+                "description": "Deletes current song by id.",
                 "consumes": [
                     "application/json"
                 ],
@@ -144,7 +147,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entities.Song"
+                            "$ref": "#/definitions/entities.IDMessage"
                         }
                     }
                 ],
@@ -162,7 +165,7 @@ const docTemplate = `{
             }
         },
         "/songs": {
-            "get": {
+            "post": {
                 "description": "filtration and pagination are supported",
                 "consumes": [
                     "application/json"
@@ -205,6 +208,14 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "entities.IDMessage": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "entities.Song": {
             "type": "object",
             "properties": {
@@ -242,22 +253,14 @@ const docTemplate = `{
                 }
             }
         },
-        "httphandlers.SongLyricsRequest": {
+        "httphandlers.SongMessage": {
             "type": "object",
             "properties": {
-                "couplet_num": {
-                    "type": "integer"
+                "group": {
+                    "type": "string"
                 },
-                "song_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "httphandlers.returnableID": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
+                "song": {
+                    "type": "string"
                 }
             }
         }

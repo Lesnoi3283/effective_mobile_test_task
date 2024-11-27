@@ -8,3 +8,7 @@ type Song struct {
 	Text        string `json:"text,omitempty"`
 	Link        string `json:"link,omitempty"`
 }
+
+type IDMessage struct {
+	ID uint64 `json:"id"`
+}

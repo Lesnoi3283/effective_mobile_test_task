@@ -2,7 +2,6 @@ package httphandlers
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/golang/mock/gomock"
@@ -11,6 +10,7 @@ import (
 	"musiclib/internal/app/entities"
 	"musiclib/internal/app/requiredinterfaces"
 	"musiclib/internal/app/requiredinterfaces/mocks"
+	"musiclib/pkg/databases/dberrors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -102,7 +102,7 @@ func Test_handler_SongsListGet(t *testing.T) {
 			fields: fields{
 				storage: func(c *gomock.Controller) requiredinterfaces.SongStorage {
 					storage := mocks.NewMockSongStorage(c)
-					storage.EXPECT().GetSongList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, sql.ErrNoRows)
+					storage.EXPECT().GetSongList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(nil, dberrors.NewNotFoundErr())
 					return storage
 				},
 			},

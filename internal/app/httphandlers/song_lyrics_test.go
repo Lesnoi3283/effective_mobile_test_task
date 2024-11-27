@@ -1,11 +1,10 @@
 package httphandlers
 
 import (
-	"bytes"
-	"database/sql"
 	"errors"
 	"musiclib/internal/app/requiredinterfaces"
 	"musiclib/internal/app/requiredinterfaces/mocks"
+	"musiclib/pkg/databases/dberrors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -46,16 +45,13 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`{
-					"song_id": 1,
-					"couplet_num": 1
-				}`)),
+				r: httptest.NewRequest("GET", "/lyrics?song_id=1&couplet_num=1", nil),
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody:   "Second couplet.",
 		},
 		{
-			name: "Bad JSON",
+			name: "Bad Query Parameters",
 			fields: fields{
 				storage: func(c *gomock.Controller) requiredinterfaces.SongStorage {
 					return mocks.NewMockSongStorage(c)
@@ -63,7 +59,7 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`invalid json`)),
+				r: httptest.NewRequest("GET", "/lyrics?song_id=1&couplet_num=abc", nil),
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   "",
@@ -77,9 +73,7 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`{
-					"couplet_num": 1
-				}`)),
+				r: httptest.NewRequest("GET", "/lyrics?couplet_num=1", nil),
 			},
 			expectedStatus: http.StatusBadRequest,
 			expectedBody:   "",
@@ -89,16 +83,13 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 			fields: fields{
 				storage: func(c *gomock.Controller) requiredinterfaces.SongStorage {
 					storage := mocks.NewMockSongStorage(c)
-					storage.EXPECT().GetSongLyrics(gomock.Any(), gomock.Any()).Return("", sql.ErrNoRows)
+					storage.EXPECT().GetSongLyrics(gomock.Any(), uint64(2)).Return("", dberrors.NewNotFoundErr())
 					return storage
 				},
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`{
-					"song_id": 2,
-					"couplet": 1
-				}`)),
+				r: httptest.NewRequest("GET", "/lyrics?song_id=2&couplet_num=1", nil),
 			},
 			expectedStatus: http.StatusNotFound,
 			expectedBody:   "",
@@ -108,16 +99,13 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 			fields: fields{
 				storage: func(c *gomock.Controller) requiredinterfaces.SongStorage {
 					storage := mocks.NewMockSongStorage(c)
-					storage.EXPECT().GetSongLyrics(gomock.Any(), gomock.Any()).Return("", errors.New("test error"))
+					storage.EXPECT().GetSongLyrics(gomock.Any(), uint64(2)).Return("", errors.New("test error"))
 					return storage
 				},
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`{
-					"song_id": 2,
-					"couplet": 1
-				}`)),
+				r: httptest.NewRequest("GET", "/lyrics?song_id=2&couplet_num=1", nil),
 			},
 			expectedStatus: http.StatusInternalServerError,
 			expectedBody:   "",
@@ -128,16 +116,13 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 				storage: func(c *gomock.Controller) requiredinterfaces.SongStorage {
 					storage := mocks.NewMockSongStorage(c)
 					lyrics := "Only one couplet."
-					storage.EXPECT().GetSongLyrics(gomock.Any(), gomock.Any()).Return(lyrics, nil)
+					storage.EXPECT().GetSongLyrics(gomock.Any(), uint64(3)).Return(lyrics, nil)
 					return storage
 				},
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`{
-					"song_id": 3,
-					"couplet_num": 200
-				}`)),
+				r: httptest.NewRequest("GET", "/lyrics?song_id=3&couplet_num=200", nil),
 			},
 			expectedStatus: http.StatusNoContent,
 			expectedBody:   "",
@@ -148,16 +133,13 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 				storage: func(c *gomock.Controller) requiredinterfaces.SongStorage {
 					storage := mocks.NewMockSongStorage(c)
 					lyrics := "First couplet.\nStill first couplet.\n\nSecond couplet."
-					storage.EXPECT().GetSongLyrics(gomock.Any(), gomock.Any()).Return(lyrics, nil)
+					storage.EXPECT().GetSongLyrics(gomock.Any(), uint64(5)).Return(lyrics, nil)
 					return storage
 				},
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`{
-					"song_id": 5,
-					"couplet": 0
-				}`)),
+				r: httptest.NewRequest("GET", "/lyrics?song_id=5&couplet_num=0", nil),
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody:   "First couplet.\nStill first couplet.",
@@ -168,16 +150,13 @@ func Test_handler_GetSongLyrics(t *testing.T) {
 				storage: func(c *gomock.Controller) requiredinterfaces.SongStorage {
 					storage := mocks.NewMockSongStorage(c)
 					lyrics := "First couplet.\n\nSecond couplet.\n\nThird couplet."
-					storage.EXPECT().GetSongLyrics(gomock.Any(), gomock.Any()).Return(lyrics, nil)
+					storage.EXPECT().GetSongLyrics(gomock.Any(), uint64(6)).Return(lyrics, nil)
 					return storage
 				},
 			},
 			args: args{
 				w: httptest.NewRecorder(),
-				r: httptest.NewRequest("POST", "/song", bytes.NewBufferString(`{
-					"song_id": 6,
-					"couplet_num": 2
-				}`)),
+				r: httptest.NewRequest("GET", "/lyrics?song_id=6&couplet_num=2", nil),
 			},
 			expectedStatus: http.StatusOK,
 			expectedBody:   "Third couplet.",
